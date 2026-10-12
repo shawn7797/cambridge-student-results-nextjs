@@ -1,8 +1,9 @@
-# Cambridge Exam Management System
+# Cambridge ResultFlow
 
 [![Vercel Deployment](https://img.shields.io/badge/vercel-deployed-success?logo=vercel&color=black)](https://cambridge-student-results-nextjs.vercel.app/)
 
-A robust, automated full-stack web application designed to streamline the management, secure splitting, and publication of Cambridge International examination results, statements of entry, and Statements of Results. Built with **Next.js App Router**, **Clerk Authentication**, **PostgreSQL**, and **Vercel Blob Storage**.
+A robust, automated full-stack web application designed to streamline the management, secure splitting, and publication of Cambridge International examination results, statements of entry, and electronic statements of results. It eliminates manual document distribution for Cambridge Exam Officers, significantly saving administrative time and minimizing human error.\
+Built with **Next.js App Router**, **Clerk Authentication**, **PostgreSQL**, and **Vercel Blob Storage**.
 
 ---
 
