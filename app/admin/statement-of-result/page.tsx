@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
 import {
   Upload,
-  FileX,
   Loader2,
   Award,
   CheckCircle2,
@@ -13,19 +12,11 @@ import {
   FileText,
 } from "lucide-react";
 
-interface UploadResult {
-  pageNumber: number;
-  candidateId?: string;
-  fileName?: string;
-  status: "Success" | "Failed";
-  reason?: string;
-}
-
 export default function StatementOfResultUploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploadResults, setUploadResults] = useState<UploadResult[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +24,7 @@ export default function StatementOfResultUploadPage() {
       const file = e.target.files[0];
       if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
         setSelectedFile(file);
-        setUploadResults([]);
+        setSuccessMessage(null);
         setError(null);
       } else {
         setError("Please select a valid PDF file.");
@@ -63,7 +54,7 @@ export default function StatementOfResultUploadPage() {
       const file = e.dataTransfer.files[0];
       if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
         setSelectedFile(file);
-        setUploadResults([]);
+        setSuccessMessage(null);
         setError(null);
       } else {
         setError("Please drop a valid PDF file.");
@@ -77,6 +68,7 @@ export default function StatementOfResultUploadPage() {
 
     setUploading(true);
     setError(null);
+    setSuccessMessage(null);
 
     const formData = new FormData();
     formData.append("file", selectedFile);
@@ -87,25 +79,15 @@ export default function StatementOfResultUploadPage() {
         body: formData,
       });
 
-      const responseText = await response.text();
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch {
-        throw new Error(
-          responseText
-            ? `Server Error: ${responseText}`
-            : `Server returned an empty response (${response.status})`,
-        );
-      }
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Failed to process Statement of Results PDF",
+          data.error || "Failed to upload Statement of Results PDF",
         );
       }
 
-      setUploadResults(data.results);
+      setSuccessMessage(data.message);
       setSelectedFile(null);
     } catch (err: any) {
       setError(err.message);
@@ -145,7 +127,6 @@ export default function StatementOfResultUploadPage() {
             onSubmit={handleUploadSubmit}
             className="bg-white p-8 rounded-2xl shadow-xs border border-slate-200 space-y-6"
           >
-            {/* Drag & Drop Target Area */}
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -190,7 +171,6 @@ export default function StatementOfResultUploadPage() {
               </label>
             </div>
 
-            {/* Selected File Card */}
             {selectedFile && (
               <div className="bg-emerald-50/50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -219,6 +199,13 @@ export default function StatementOfResultUploadPage() {
               </div>
             )}
 
+            {successMessage && (
+              <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-600" />
+                <span>{successMessage}</span>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={uploading || !selectedFile}
@@ -227,73 +214,13 @@ export default function StatementOfResultUploadPage() {
               {uploading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Splitting PDF and Processing Candidates...
+                  Uploading File...
                 </>
               ) : (
-                "Process and Upload Statement of Results"
+                "Upload Statement of Results"
               )}
             </button>
           </form>
-
-          {/* Processing Results Summary Table */}
-          {uploadResults.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden">
-              <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-800">
-                  Page Splitting & Upload Results
-                </h2>
-                <span className="text-xs font-semibold px-2.5 py-1 bg-slate-200 text-slate-700 rounded-full">
-                  Total Pages Processed: {uploadResults.length}
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-slate-100/80 text-slate-700 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                      <th className="py-3.5 px-6">Page #</th>
-                      <th className="py-3.5 px-6">Extracted Candidate ID</th>
-                      <th className="py-3.5 px-6">Generated File Name</th>
-                      <th className="py-3.5 px-6">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {uploadResults.map((res, idx) => (
-                      <tr
-                        key={idx}
-                        className="hover:bg-slate-50/80 transition-colors"
-                      >
-                        <td className="py-4 px-6 font-mono text-xs text-slate-700">
-                          Page {res.pageNumber}
-                        </td>
-                        <td className="py-4 px-6 font-mono font-semibold text-emerald-600">
-                          {res.candidateId || "—"}
-                        </td>
-                        <td className="py-4 px-6 font-mono text-xs text-slate-600">
-                          {res.fileName || "—"}
-                        </td>
-                        <td className="py-4 px-6">
-                          {res.status === "Success" ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Success
-                            </span>
-                          ) : (
-                            <span
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-100 text-rose-800 text-xs font-semibold rounded-full"
-                              title={res.reason}
-                            >
-                              <FileX className="w-3.5 h-3.5" />{" "}
-                              {res.reason || "Failed"}
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </div>
