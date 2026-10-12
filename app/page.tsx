@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
+// Force all routes in the app to be dynamic by default
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
