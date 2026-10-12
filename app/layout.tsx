@@ -16,8 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Student Results",
-  description: "Ideated and developed by Shawn Mathias",
+  title: "Cambridge ResultFlow",
+  description:
+    "A secure, automated platform for managing and distributing Cambridge International examination results and statements of entry.",
 };
 
 export default function RootLayout({

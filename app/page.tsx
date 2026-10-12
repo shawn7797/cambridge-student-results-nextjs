@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Loading from "@/components/Loading";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const { user, isLoaded } = useUser();
@@ -214,6 +215,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {/* <Footer /> */}
       </main>
 
       {/* Custom Scrollbar Styling matching the blue theme */}
