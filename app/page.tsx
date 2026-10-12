@@ -3,18 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import {
-  Search,
-  FileText,
-  ShieldCheck,
-  Zap,
-  ArrowRight,
-  Loader2,
-} from "lucide-react";
+import { Search, Zap, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
-
-// Force all routes in the app to be dynamic by default
-export const dynamic = "force-dynamic";
+import Loading from "@/components/Loading";
 
 export default function Home() {
   const { user, isLoaded } = useUser();
@@ -37,11 +28,7 @@ export default function Home() {
 
   // Show a tiny loader while checking user session to prevent flickering
   if (!isLoaded || user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
+    return <Loading />;
   }
 
   const handleSearch = (e: React.FormEvent) => {

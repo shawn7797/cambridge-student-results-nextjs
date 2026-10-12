@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import Loading from "@/components/Loading";
 
 export default function StatementOfEntryPage() {
   const { user, isLoaded } = useUser();
@@ -110,11 +111,7 @@ export default function StatementOfEntryPage() {
   };
 
   if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
+    return <Loading />;
   }
 
   const adminName = user?.firstName || user?.username || "Admin";

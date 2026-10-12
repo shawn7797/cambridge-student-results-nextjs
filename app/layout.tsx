@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Suspense } from "react";
+import Loading from "@/components/Loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,14 +20,17 @@ export const metadata: Metadata = {
   description: "Ideated and developed by Shawn Mathias",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <ClerkProvider>{children}</ClerkProvider>
+    <html lang="en">
+      <body>
+        <Suspense fallback={<Loading />}>
+          <ClerkProvider>{children}</ClerkProvider>
+        </Suspense>
       </body>
     </html>
   );
