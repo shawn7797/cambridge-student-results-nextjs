@@ -1,4 +1,3 @@
-// app/admin/layout.tsx
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 

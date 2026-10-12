@@ -1,4 +1,3 @@
-// app/api/admin/statement-of-result/route.ts
 import { NextResponse, after } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { Pool } from "pg";

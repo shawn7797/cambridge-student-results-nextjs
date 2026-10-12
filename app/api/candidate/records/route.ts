@@ -1,4 +1,3 @@
-// app/api/candidate/records/route.ts
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { Pool } from "pg";
