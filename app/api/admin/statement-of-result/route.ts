@@ -30,7 +30,8 @@ export async function POST(request: Request) {
     );
 
     // 2. Trigger QStash message to your worker route
-    const workerEndpoint = `${process.env.NEXT_PUBLIC_APP_URL}/api/process-statement-of-results`;
+    const baseUrl = new URL(request.url).origin;
+    const workerEndpoint = `${baseUrl}/api/process-statement-of-results`;
 
     await qstash.publishJSON({
       url: workerEndpoint,
