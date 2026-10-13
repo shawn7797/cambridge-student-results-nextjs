@@ -3,7 +3,7 @@ import { Receiver } from "@upstash/qstash";
 import { Pool } from "pg";
 import { put, del } from "@vercel/blob";
 import { PDFDocument } from "pdf-lib";
-import { PDFParse } from "pdf-parse";
+import { getDocumentProxy, extractText } from "unpdf";
 
 // Allow up to 300 seconds execution time on Vercel Pro
 export const maxDuration = 300;
@@ -60,17 +60,21 @@ export async function POST(request: Request) {
       pageBuffers.push(Buffer.from(pdfBytes));
     }
 
-    // Step 2: Process each page and save to your exact desired path structure
+    // Step 2: Process each page using unpdf
     for (let i = 0; i < totalPages; i++) {
       const singlePageBuffer = pageBuffers[i];
       let candidateId = "";
       let fileYear = new Date().getFullYear().toString();
-      let parser: any = null;
+      let pdfProxy: any = null;
 
       try {
-        parser = new PDFParse({ data: singlePageBuffer });
-        const pdfResult = await parser.getText();
-        const pdfText = pdfResult.text.replace(/\s+/g, " ");
+        // Load page buffer into unpdf proxy
+        pdfProxy = await getDocumentProxy(new Uint8Array(singlePageBuffer));
+        const result = await extractText(pdfProxy, { mergePages: true });
+        const pdfText =
+          typeof result.text === "string"
+            ? result.text.replace(/\s+/g, " ")
+            : "";
 
         const candMatch = pdfText.match(/A[EΕ]021\s*\/\s*(\d+)/i);
         if (candMatch) {
@@ -90,8 +94,9 @@ export async function POST(request: Request) {
         );
         continue;
       } finally {
-        if (parser) {
-          await parser.destroy();
+        // Crucial memory optimization: destroy proxy after use
+        if (pdfProxy && typeof pdfProxy.destroy === "function") {
+          await pdfProxy.destroy();
         }
       }
 
@@ -104,7 +109,7 @@ export async function POST(request: Request) {
 
       const fileName = `${candidateId}.pdf`;
 
-      // Upload individual page to your exact path: statement_results/{year}/{candidateID}.pdf
+      // Upload individual page to statement_results/{year}/{candidateID}.pdf
       const blob = await put(
         `statement_results/${fileYear}/${fileName}`,
         singlePageBuffer,
@@ -135,7 +140,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Step 3: Clean up and delete the temporary bulk PDF blob[cite: 2]
+    // Step 3: Clean up and delete the temporary bulk PDF blob
     try {
       await del(fileUrl);
       console.log("Temporary bulk PDF successfully deleted.");
